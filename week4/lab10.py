@@ -7,7 +7,7 @@ def startGame( correctPhrase, numOfTrys ):
   correctPhraseLength = lenghtWithNoDupes(correctPhrase)
   while numOfTrys > 0:
     guess = requestString("Guess a letter: ")
-    if len(guess) == 0 or len(guess) > 1 or guess.isdigit() or guess == " ":
+    if len(guess) == 0 or len(guess) > 1 or guess.isdigit() or guess == " " or not guess.isalpha():
       printNow( "\nLetters and single characters only please!" ) 
     elif inArray( guess, incorrectGuesses) or inArray( guess, correctGuesses):
       printNow( "\nYou already guess that, try again" )
@@ -115,7 +115,7 @@ def printResponseToGuess( wasCorrect, correctPhrase, correctGuesses, incorrectGu
 # of trys, as well as the word/phrase
 # to guess here
 def hangMan():
-  correctPhrase = "Hello wolrd!"
+  correctPhrase = "Hello wolrd"
   numOfTrys = 6;
   gameDescription()
   startGame( correctPhrase, numOfTrys )
