@@ -1,5 +1,11 @@
 
 
+
+# Matthew Bozelka - Lab Number 8
+# Peer Partners - Julia Diliberto, Robert Contreras, Ryan Doherty
+
+
+
 # main function that handles most of the game logic 
 def startGame( correctPhrase, numOfTrys ):
   incorrectGuesses = []
