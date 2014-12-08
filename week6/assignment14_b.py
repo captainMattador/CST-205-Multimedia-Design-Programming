@@ -44,6 +44,7 @@ def removeSpecialChars(string):
 def makeHeadlines():
   file = open("/Users/Captain/GitHub/CST-205-Multimedia-Design-Programming/week6/index.html","rt")
   fileToText = file.read() 
+  file.close()
   fileToText = fileToText.split()
   finalDict = dict()
   firstExtract = dict()
