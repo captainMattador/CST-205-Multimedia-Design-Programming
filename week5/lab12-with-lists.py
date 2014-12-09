@@ -219,10 +219,10 @@ def endGame(winner, userName):
 def getItem(currentLocation, items, gameVars):
   # debugger(currentLocation)
   # debugger(items)
-  # debugger(hasStick)
-  # debugger(hasKey)
-  # debugger(hasPick)
-  # debugger(jarBorken)
+  # debugger(gameVars["hasStick"])
+  # debugger(gameVars["hasKey"])
+  # debugger(gameVars["hasPick")
+  # debugger(gameVars["jarBorken"])
   if currentLocation == "Starting Point" and not gameVars["hasPick"]:
     items.append("pick")
     printNow("\nNice! You can use this pick to undo your handcuffs!")
@@ -246,9 +246,9 @@ def getItem(currentLocation, items, gameVars):
 def useAnItem(currentLocation, items, gameVars):
   # debugger(currentLocation)
   # debugger(items)
-  # debugger(hasStick)
-  # debugger(hasKey)
-  # debugger(stillCuffed)
+  # debugger(gameVars["hasStick"])
+  # debugger(gameVars["hasKey"])
+  # debugger(gameVars["stillCuffed"])
   printNow("\nYour current inventory includes:")
   printNow(items)
   item = requestString("\nType the name of the item you would like to use or nevermind to continue exploring.")
