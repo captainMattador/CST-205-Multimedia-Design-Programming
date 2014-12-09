@@ -7,7 +7,7 @@ def debugger(msg):
 
 # handles all the messaging for the game. Checks certain
 # parameters to determine what the room should say.
-def messages(msg, hasStick, hasKey, hasPick, stillCuffed, jarBorken):
+def messages(msg, gameVars):
   
   # intro
   intro = """\n*** Welcome to \"Escape the Horror!\" A text based adventure game! ***\n
@@ -35,12 +35,12 @@ Whatever you do, don't let the man find you!
 At any time type \"help\" to see instructions again, or \"exit\" to end the game."""
   
   # statements for the basement
-  if not hasPick:
+  if not gameVars["hasPick"]:
     begining = """\nYou're currently in the basement and your hands are cuffed.
 There is a small item on the table that might be usable as a pick.
 It looks like there is only one way out.
 You're going to have to take the stairs to the south."""
-  elif hasPick and stillCuffed:
+  elif gameVars["hasPick"] and gameVars["stillCuffed"]:
     begining = """\nYou're currently in the basement and your hands are cuffed.
 It looks like there is only one way out.
 You're going to have to take the stairs to the south."""
@@ -59,17 +59,17 @@ You can take the door way to the east, door way to the west, or go down the stai
 It looks like you're done for!"""
   
   # statements for the kitchen
-  if not jarBorken:
+  if not gameVars["jarBorken"]:
     kitchen = """\nYou are in the kitchen.
 I don't see any knives anywhere. There is a jar on the top cabinet.
 You can't reach it though. If only you had a stick.
 There is a door to the north, a door to the east"""
-  elif not hasKey and jarBorken:
+  elif not gameVars["hasKey"] and gameVars["jarBorken"]:
     kitchen = """\nYou are in the kitchen.
 I don't see any knives anywhere. You smashed the jar and a key fell out.
 I bet that will be useful.
 There is a door to the north, a door to the east"""
-  elif hasKey:
+  elif gameVars["hasKey"]:
     kitchen = """\nYou are in the kitchen.
 I don't see any knives anywhere.
 There is a door to the north, a door to the east"""
@@ -81,7 +81,7 @@ I doubt any laundry gets done in here.
 Head through the doorway to the south or the door way to east"""
   
   # statements for the bedroom
-  if not hasStick:
+  if not gameVars["hasStick"]:
     bedroom = """\nYou are in the master bedroom.
 The walls are covered in red paint that says \"the voices never stop!\"
 The stench is awful.
@@ -121,7 +121,7 @@ bedroom."""
   error = """Sorry, I didn't understand what you meant. Type another command."""
   
   if msg == "intro":
-    printNow(intro)   
+   showInformation(intro)   
   elif msg == "instructions":
     printNow(instructions)  
   elif msg == "Basement":
@@ -206,32 +206,32 @@ def changeLocations(currentLocation, direction):
     
     
 # end game function. Checks if you won the game or lost
-def endGame(winner):
+def endGame(winner, userName):
   if winner:
-    printNow("\nWOW! You made it out! You live to see another day.")
+    showInformation("\nWOW %s! You made it out! You live to see another day." % userName )
   else:
-    printNow("\nYou were caught by the killer! Your chances were slim anyways.")  
+    showInformation("\nDarn it %s! You were caught by the killer! Your chances were slim anyways." % userName)  
 
 
 
 # function that handles getting the items. checks for required variables
 # it returns the item gotten if one is able to be gotten
-def getItem(currentLocation, items, hasStick, hasKey, hasPick, jarBorken):
+def getItem(currentLocation, items, gameVars):
   # debugger(currentLocation)
   # debugger(items)
   # debugger(hasStick)
   # debugger(hasKey)
   # debugger(hasPick)
   # debugger(jarBorken)
-  if currentLocation == "Starting Point" and not hasPick:
+  if currentLocation == "Starting Point" and not gameVars["hasPick"]:
     items.append("pick")
     printNow("\nNice! You can use this pick to undo your handcuffs!")
     return "pick"
-  elif currentLocation == "Kitchen" and jarBorken and not hasKey:
+  elif currentLocation == "Kitchen" and gameVars["jarBorken"] and not gameVars["hasKey"]:
     items.append("key")
     printNow("\nThis is awesome! You have a key. It must go to something important!")
     return "key"
-  elif currentLocation == "Bedroom" and not hasStick:
+  elif currentLocation == "Bedroom" and not gameVars["hasStick"]:
     items.append("stick")
     printNow("\nI'm sure this stick will be useful")
     return "stick"
@@ -243,7 +243,7 @@ def getItem(currentLocation, items, hasStick, hasKey, hasPick, jarBorken):
 
 # function that handles if a user wants to use an item. 
 # often checks for certain variables
-def useAnItem(currentLocation, items, hasStick, hasKey, stillCuffed):
+def useAnItem(currentLocation, items, gameVars):
   # debugger(currentLocation)
   # debugger(items)
   # debugger(hasStick)
@@ -261,17 +261,17 @@ def useAnItem(currentLocation, items, hasStick, hasKey, stillCuffed):
         removeInventory(items, item)
         printNow("\nPerfect! now your hands are free to use!")
         return "pick"
-      elif item == "key" and currentLocation == "Living Room" and not stillCuffed:
+      elif item == "key" and currentLocation == "Living Room" and not gameVars["stillCuffed"]:
         removeInventory(items, item)
         printNow("\nYes! We'r getting out of here!")
         return "key"
-      elif item == "key" and currentLocation == "Living Room" and stillCuffed:
+      elif item == "key" and currentLocation == "Living Room" and gameVars["stillCuffed"]:
         printNow("\nCrap... You can't reach the lock with your hands still tied")
         return "undefined"
       elif item == "key" and currentLocation == "Foyer":
         printNow("\nNO! It doesn't seem to go to any of these bolts!.")
         return "undefined"
-      elif item == "stick" and currentLocation == "Kitchen" and not hasKey:
+      elif item == "stick" and currentLocation == "Kitchen" and not gameVars["hasKey"]:
         printNow("\nGreat job! You knocked down the jar! And look, there was a key in there!")
         return "stick"
       else:
@@ -305,60 +305,64 @@ def checkInventory(items, item):
 # starts the game and handles the main logic   
 def playGame():
   
-  gameOver = false        # determines if game is over or not
-  winner = false          # var for winnder or loser
-  leftBasement = false    # var true if left basement for first time
-  itemUsed = false        # captures which item gets used
-  stillCuffed = true      # checks if still handcuffed
-  hasKey = false          # true if you've found the key
-  hasStick = false        # true if you've found the stick
-  hasPick = false         # true if you've foudn the pick
-  jarBorken = false       # true if you've broken the jar
+  gameVars = dict()
+  gameVars["gameOver"] = false        # determines if game is over or not
+  gameVars["winner"] = false          # var for winnder or loser
+  gameVars["leftBasement"] = false    # var true if left basement for first time
+  gameVars["itemUsed"] = false        # captures which item gets used
+  gameVars["stillCuffed"] = false      # checks if still handcuffed
+  gameVars["hasKey"] = false          # true if you've found the key
+  gameVars["hasStick"] = false        # true if you've found the stick
+  gameVars["hasPick"] = false         # true if you've foudn the pick
+  gameVars["jarBorken"] = false       # true if you've broken the jar
   items = []              # array of found items
   currentLocation = "Starting Point"
+  userName = ""
   
-  messages("intro", hasStick, hasKey, hasPick, stillCuffed, jarBorken)
-  messages("instructions", hasStick, hasKey, hasPick, stillCuffed, jarBorken)
-  messages(currentLocation, hasStick, hasKey, hasPick, stillCuffed, jarBorken)
   
-  while not(gameOver):
+  messages("intro", gameVars)
+  messages("instructions", gameVars)
+  userName = requestString("\nEnter the name of your character:")
+  messages(currentLocation, gameVars)
+  
+  while not(gameVars["gameOver"]):
     userInput = getInput()
     if userInput == "exit":
-      gameOver = true
-      endGame(winner)
+      gameVars["gameOver"] = true
+      endGame(gameVars["winner"], userName)
     elif userInput == "help":
-      messages("instructions", hasStick, hasKey, hasPick, stillCuffed, jarBorken)
+      messages("instructions", gameVars)
     else:
       if userInput == "pick up":
-        item = getItem(currentLocation, items, hasStick, hasKey, hasPick, jarBorken)
+        item = getItem(currentLocation, items, gameVars)
         # debugger(item)
         if item == "stick":
-          hasStick = true
+          gameVars["hasStick"] = true
         elif item == "key":
-          hasKey = true
+          gameVars["hasKey"] = true
         elif item == "pick":
-          hasPick = true
+          gameVars["hasPick"] = true
       elif userInput == "use item":
-        itemUsed = useAnItem(currentLocation, items, hasStick, hasKey, stillCuffed)
+        itemUsed = useAnItem(currentLocation, items, gameVars)
         # debugger(itemUsed)
         if itemUsed == "key":
-          gameOver = true
-          winner = true
-          endGame(winner)
+          gameVars["gameOver"] = true
+          gameVars["winner"] = true
+          endGame(gameVars["winner"], userName)
         elif itemUsed == "pick":
-          stillCuffed = false
+          gameVars["stillCuffed"] = false
         elif itemUsed == "stick":
-          jarBorken = true
+          gameVars["jarBorken"] = true
       else:
         currentLocation = changeLocations(currentLocation, userInput)
         # debugger(currentLocation)
-        if currentLocation == "Basement" and leftBasement:
-          gameOver = true
-          messages(currentLocation, hasStick, hasKey, hasPick, stillCuffed, jarBorken)
-          endGame(winner)
+        if currentLocation == "Basement" and gameVars["leftBasement"]:
+          gameVars["gameOver"] = true
+          messages(currentLocation, gameVars)
+          endGame(gameVars["winner"], userName)
         else:
-          leftBasement = true
-          messages(currentLocation, hasStick, hasKey, hasPick, stillCuffed, jarBorken)
+          gameVars["leftBasement"] = true
+          messages(currentLocation, gameVars)
 
 
 
